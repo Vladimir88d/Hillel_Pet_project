@@ -1,0 +1,24 @@
+body {
+  background-image: url(../images/map_bg.png);
+ }
+ 
+ img {
+     display:block;
+     height: 60px;
+     width: 60px;
+     border-radius: 50%;
+     border: 1px solid rgb(0, 81, 255);
+     padding: 5px;
+     
+   }
+ 
+ form {
+   width: 400px;
+   right: 50px;
+   position: fixed;
+ }
+ 
+ .type {
+   display: inline-block;
+   margin: 10px;
+ }
