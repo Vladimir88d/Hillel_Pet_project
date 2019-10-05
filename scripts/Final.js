@@ -9,7 +9,7 @@ let plumber = new ServiceType('Plumber',
     ['Unblock toilet', 'Unblock a sink', 'Fix a water leak',
         'Install a sink', 'Install a shower', 'Install a toilet']);
 let gardener = new ServiceType('Gardener', ['Cut trees', 'Wattering flowers', 'Sweepping garden']);
-let housekeeper = new ServiceType('Housekeeper', ['Cleaning house']);
+let housekeeper = new ServiceType('Housekeeper', ['Clean house']);
 let cook = new ServiceType('Cook', ['Prepare breakfest', 'Prepare food for birtday party']);
 let services = [electrician, plumber, gardener, housekeeper, cook];
 
@@ -30,8 +30,8 @@ form.addButton(serviceType, 'Housekeeper', './images/icons/housekeeper_321399_cc
 form.addButton(serviceType, 'Cook', './images/icons/cook_321395_cc.svg');
 
 
-form.addTextField(locat);
-form.addTextField(taskDescr);
+form.addTextField(locat, 'location');
+form.addTextField(taskDescr, 'task_description');
 
 form.appendForm();
 
@@ -40,6 +40,9 @@ let formModel = new FormModel(services);
 let formView = new FormView(form);
 let formController = new FormController(formModel, formView);
 formController.listenServiceBtn('.service');
+formController.listenTaskButtons('.task_btn');
+formController.listenDescrtiption('#task_description');
+formView.showNewTaskSection('.new_task');
 
 
 
@@ -58,10 +61,8 @@ function Form(serviceTypeList) {
         let fieldset = document.createElement('fieldset');
         fieldset.classList.add(className);
         let legend = document.createElement('legend');
-        let div = document.createElement('div');
         legend.innerText = sectionName;
         fieldset.appendChild(legend);
-        fieldset.appendChild(div);
         this.form.appendChild(fieldset);
         return fieldset;
     }
@@ -80,14 +81,16 @@ function Form(serviceTypeList) {
 
     this.addTaskButton = function (fieldsetClass, btnName, btnClass) {
         let button = document.createElement('button');
+        button.setAttribute('type', 'button');
         button.innerText = btnName;
         button.setAttribute('class', btnClass);
         let elem = document.querySelector(fieldsetClass);
         elem.appendChild(button);
     }
 
-    this.addTextField = function (fieldset) {
+    this.addTextField = function (fieldset, id) {
         let textField = document.createElement('input');
+        textField.setAttribute('id', id);
         fieldset.appendChild(textField);
     }
 
@@ -124,6 +127,36 @@ function FormView(form) {
 
     }
 
+    this.showNewTaskSection = function (className) {
+        let newTaskSection = document.querySelector(className);
+        let description = document.createElement('div');
+        description.setAttribute('id', 'new_task_description');
+        let serviceType = document.createElement('span');
+        serviceType.setAttribute('id', 'service_type');
+        description.appendChild(serviceType);
+        let taskType = document.createElement('span');
+        taskType.setAttribute('id', 'task_type');
+        description.appendChild(taskType);
+
+        let taskDescr = document.createElement('span');
+        taskDescr.setAttribute('id', 'task_description');
+        description.appendChild(taskDescr);
+
+        let button = document.createElement('button');
+        button.setAttribute('type', 'button');
+        button.innerHTML = 'CREATE TASK';
+        newTaskSection.appendChild(description);
+        newTaskSection.appendChild(button);
+
+    }
+
+    this.addNewTaskDescription = function (fieldId, text) {
+        let field = document.querySelector(fieldId);
+        field.innerHTML = text;
+    }
+
+
+
 
 }
 
@@ -147,9 +180,39 @@ function FormController(formModel, formView) {
             let serviceName = event.target.nextSibling.innerText;
             let service = this.formModel.getTaskList(serviceName);
             this.formView.showTasks(service.taskList);
+            this.formView.addNewTaskDescription('#service_type', "I need a " + serviceName.toLowerCase())
+            this.formView.addNewTaskDescription('#task_type', '');
+            this.listenTaskButtons();
         }
 
     }
+
+    this.listenTaskButtons = function (className) {
+        let elem = document.querySelector('.tasks');
+        elem.addEventListener('click', this.handelTaskBtn.bind(this));
+
+    }
+
+    this.handelTaskBtn = function () {
+
+        if (event.target.tagName === 'BUTTON') {
+            this.formView.addNewTaskDescription('#task_type', " to " + event.target.innerText.toLowerCase()+". ");
+
+        }
+
+    }
+
+    this.listenDescrtiption = function (textFieldId){
+        let field = document.querySelector(textFieldId);
+        field.addEventListener('input', ()=> {
+            this.formView.addNewTaskDescription('#task_description', " "+field.value);
+        }
+        );
+    }
+
+    
+
+
 
 
 }
@@ -159,7 +222,6 @@ function FormModel(services) {
     this.services = services;
 
     this.getTaskList = function (serviceName) {
-        console.log(this.services);
         return this.services.find((elem) => elem.name === serviceName);
     }
 
