@@ -1,0 +1,22 @@
+{
+  "name": "hillel_pet_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vladimir88d/Hillel_Pet_project.git"
+  },
+  "author": "Vladimir Dermenzhiev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vladimir88d/Hillel_Pet_project/issues"
+  },
+  "homepage": "https://github.com/Vladimir88d/Hillel_Pet_project#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
