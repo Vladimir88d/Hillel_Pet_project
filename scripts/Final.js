@@ -246,10 +246,17 @@ function FormModel(services) {
 }
 
 
-function Task() {
+function Task(serviceType, taskType, description, location) {
+    this.serviceType = serviceType;
+    this.taskType = taskType;
     this.description = description;
     this.location = location;
     this.date = new Date();
+
+    this.getTaskContent = function () {
+        return this.serviceType
+            + this.taskType + this.description + this.location;
+    }
 }
 
 
@@ -281,24 +288,24 @@ function TaskView(mainContainerId, tasksContainerId, newTaskBtnId) {
         return container;
     }
 
-    this.createTaskElem = function (task) {
-       let taskElem = document.createElement('div');
-       taskElem.setAttribute('class', 'task');
-       let date  = document.createElement('p');
-       date.innerHTML = new Date ();
-       date.setAttribute('id', 'date');
-       let description = document.createElement('p');
-       description.innerHTML = 'TEST';
-       description.setAttribute('id', 'description');
-       taskElem.appendChild(date);
-       taskElem.appendChild(description);
-       addButton(taskElem, 'edit_btn', 'EDIT');
-       addButton(taskElem, 'del_btn', 'DELETE');
-       let tasksContainer = document.querySelector('#task_container');
-       tasksContainer.appendChild(taskElem);
+    this.showTask = function (task) {
+        let taskElem = document.createElement('div');
+        taskElem.setAttribute('class', 'task');
+        let date = document.createElement('p');
+        date.innerHTML = task.date;
+        date.setAttribute('id', 'date');
+        let description = document.createElement('p');
+        description.innerHTML = task.getTaskContent();
+        description.setAttribute('id', 'description');
+        taskElem.appendChild(date);
+        taskElem.appendChild(description);
+        addButton(taskElem, 'edit_btn', 'EDIT');
+        addButton(taskElem, 'del_btn', 'DELETE');
+        let tasksContainer = document.querySelector('#task_container');
+        tasksContainer.appendChild(taskElem);
     }
 
-    function addButton(mainContainer, btnClass, btnName){
+    function addButton(mainContainer, btnClass, btnName) {
         let btn = document.createElement('button');
         btn.innerHTML = btnName;
         console.log(mainContainer);
@@ -310,8 +317,9 @@ function TaskView(mainContainerId, tasksContainerId, newTaskBtnId) {
 
 }
 
-function TaskController() {
-
+function TaskController(taskModel, taskView) {
+    this.taskModel = taskModel;
+    this.taskView = taskView;
 
     this.listenNewTaskBtn = function (btnId) {
         let button = document.body.querySelector(btnId);
@@ -321,25 +329,59 @@ function TaskController() {
     }
 
 
-    this.listenCreateTaskBtn = function (btn) {
+    this.listenCreateTaskBtn = function (btnId) {
+        let btn = document.querySelector(btnId);
+        btn.addEventListener('click', this.addTask.bind(this));
+    }
 
+
+
+    function getTask() {
+        let serviceType = document.querySelector('#service_type').innerHTML;
+        let taskType = document.querySelector('#task_type').innerHTML;
+        let taskDescr = document.querySelector('#task_description_output').innerHTML;
+        let taskLocation = document.querySelector('#task_location').innerHTML;
+        let task = new Task(serviceType, taskType, taskDescr, taskLocation);
+        return task;
+    }
+
+    this.addTask = function () {
+        let task = getTask();
+        this.taskView.showTask(task);
+    }
+
+    this.listenDeleteBtn = function (btnId) {
+        let btn = document.querySelector(btnId);
+        btn.addEventListener('click', () => {
+           if (event.target.innerText === 'DELETE')
+                 event.target.parentElement.remove();
+
+        }
+
+        );
     }
 
 }
 
-function TaskModel() {
+function TaskModel(taskList) {
+    this.taskList = taskList;
 
+    this.addTask = function (task) {
+        this.taskList.putsh(task);
+    }
 }
 
 
 let taskView = new TaskView('main_container', 'task_container', 'new_task_btn');
 taskView.showTasksContainer();
-taskView.createTaskElem();
-taskView.createTaskElem();
+taskView.showTask(new Task('I need a plumber ', 'to fix a sink.', 'Something stucked inside pipe. ', 'Dnipro, Mechnikova 10'));
 
+let taskModel = new TaskModel();
 
-let taskController = new TaskController();
+let taskController = new TaskController(taskModel, taskView);
 taskController.listenNewTaskBtn('#new_task_btn');
+taskController.listenCreateTaskBtn('#create_task');
+taskController.listenDeleteBtn('#main_container');
 
 
 
