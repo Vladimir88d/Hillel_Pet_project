@@ -36,7 +36,8 @@ let formView = new FormView(form);
 let formController = new FormController(formModel, formView);
 formController.listenServiceBtn('.service');
 formController.listenTaskButtons('.task_btn');
-formController.listenDescrtiption('#task_description_input', '#task_description_output');
+formController.listenTexField('#task_description_input', '#task_description_output');
+formController.listenTexField('#location', '#task_location');
 formView.showServiceButtons(formModel.services);
 formView.showNewTaskSection('.new_task');
 
@@ -151,6 +152,7 @@ function FormView(form) {
 
         let button = document.createElement('button');
         button.setAttribute('type', 'button');
+        button.setAttribute('id', 'create_task');
         button.innerHTML = 'CREATE TASK';
         newTaskSection.appendChild(description);
         newTaskSection.appendChild(button);
@@ -158,7 +160,7 @@ function FormView(form) {
     }
 
     function addLocationField(descriptionContainer, fieldId) {
-        let locationField = document.createElement('span');
+        let locationField = document.createElement('p');
         locationField.setAttribute('id', fieldId);
         descriptionContainer.appendChild(locationField);
     }
@@ -177,10 +179,6 @@ function FormController(formModel, formView) {
     this.formModel = formModel;
     this.formView = formView;
 
-    let button = document.body.querySelector('#newtask');
-    button.addEventListener('click', () => {
-        $("form").toggle(1000);
-    });
 
     this.listenServiceBtn = function (className) {
         let elem = document.querySelector(className);
@@ -205,7 +203,7 @@ function FormController(formModel, formView) {
     function cleanField(fieldId) {
         let elem = document.querySelector(fieldId);
         if (elem.tagName === 'INPUT') { elem.value = ''; }
-        else if (elem.tagName ==='SPAN') {
+        else if (elem.tagName === 'SPAN') {
             console.log(elem);
             elem.innerText = '';
         }
@@ -218,7 +216,6 @@ function FormController(formModel, formView) {
     }
 
     this.handelTaskBtn = function () {
-
         if (event.target.tagName === 'BUTTON') {
             this.formView.addNewTaskDescription('#task_type', " to " + event.target.innerText.toLowerCase() + ". ");
             cleanField('#task_description_input');
@@ -227,7 +224,7 @@ function FormController(formModel, formView) {
 
     }
 
-    this.listenDescrtiption = function (textFieldId, outputFieldId) {
+    this.listenTexField = function (textFieldId, outputFieldId) {
         let field = document.querySelector(textFieldId);
         field.addEventListener('input', () => {
             this.formView.addNewTaskDescription(outputFieldId, " " + field.value);
@@ -247,6 +244,102 @@ function FormModel(services) {
     }
 
 }
+
+
+function Task() {
+    this.description = description;
+    this.location = location;
+    this.date = new Date();
+}
+
+
+function TaskView(mainContainerId, tasksContainerId, newTaskBtnId) {
+    this.mainContainerId = mainContainerId;
+    this.tasksContainerId = tasksContainerId;
+    this.newTaskBtnId = newTaskBtnId;
+
+
+    this.showTasksContainer = function () {
+        let mainContainer = createContainer(this.mainContainerId);
+        let tasksContainer = createContainer(this.tasksContainerId);
+        let newTaskBtn = createButton('+NEW TASK', this.newTaskBtnId);
+        mainContainer.appendChild(newTaskBtn);
+        mainContainer.appendChild(tasksContainer);
+        document.body.appendChild(mainContainer);
+    }
+
+    function createButton(btnName, btnId) {
+        let newTaskBtn = document.createElement('button');
+        newTaskBtn.innerHTML = btnName;
+        newTaskBtn.setAttribute('id', btnId);
+        return newTaskBtn;
+    }
+
+    function createContainer(containerId) {
+        let container = document.createElement('div');
+        container.setAttribute('id', containerId);
+        return container;
+    }
+
+    this.createTaskElem = function (task) {
+       let taskElem = document.createElement('div');
+       taskElem.setAttribute('class', 'task');
+       let date  = document.createElement('p');
+       date.innerHTML = new Date ();
+       date.setAttribute('id', 'date');
+       let description = document.createElement('p');
+       description.innerHTML = 'TEST';
+       description.setAttribute('id', 'description');
+       taskElem.appendChild(date);
+       taskElem.appendChild(description);
+       addButton(taskElem, 'edit_btn', 'EDIT');
+       addButton(taskElem, 'del_btn', 'DELETE');
+       let tasksContainer = document.querySelector('#task_container');
+       tasksContainer.appendChild(taskElem);
+    }
+
+    function addButton(mainContainer, btnClass, btnName){
+        let btn = document.createElement('button');
+        btn.innerHTML = btnName;
+        console.log(mainContainer);
+        btn.setAttribute('class', btnClass);
+        mainContainer.appendChild(btn);
+
+    }
+
+
+}
+
+function TaskController() {
+
+
+    this.listenNewTaskBtn = function (btnId) {
+        let button = document.body.querySelector(btnId);
+        button.addEventListener('click', () => {
+            $("form").toggle(1000);
+        });
+    }
+
+
+    this.listenCreateTaskBtn = function (btn) {
+
+    }
+
+}
+
+function TaskModel() {
+
+}
+
+
+let taskView = new TaskView('main_container', 'task_container', 'new_task_btn');
+taskView.showTasksContainer();
+taskView.createTaskElem();
+taskView.createTaskElem();
+
+
+let taskController = new TaskController();
+taskController.listenNewTaskBtn('#new_task_btn');
 
 
 

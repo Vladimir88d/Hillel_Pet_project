@@ -48,3 +48,23 @@ body {
    padding: 5px;
  }
 
+ #main_container {
+   position: absolute;
+   width: 300px;
+   
+ }
+
+ .task {
+   margin: 10px;
+  
+   background-color:white;
+
+ }
+
+ .edit_btn, #create_task {
+   background-color: #6551F6;
+    color: white;
+ }
+
+
+
