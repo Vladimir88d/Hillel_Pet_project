@@ -4,13 +4,13 @@
 Реализовать добавление, редактирование и удаление задач. Данные сохранять используя любой бекенд (в нашем случае просто NodeJS)
 Код выполненного задания выложить на github с описанием шагов для запуска приложения.*/
 
-let electrician = new ServiceType('Electrician', ['Fix TV', 'Fix washer', 'Fix Iron']);
+let electrician = new ServiceType('Electrician', ['Fix TV', 'Fix washer', 'Fix Iron'], './images/icons/electrician_321339_cc.svg');
 let plumber = new ServiceType('Plumber',
     ['Unblock toilet', 'Unblock a sink', 'Fix a water leak',
-        'Install a sink', 'Install a shower', 'Install a toilet']);
-let gardener = new ServiceType('Gardener', ['Cut trees', 'Wattering flowers', 'Sweepping garden']);
-let housekeeper = new ServiceType('Housekeeper', ['Clean house']);
-let cook = new ServiceType('Cook', ['Prepare breakfest', 'Prepare food for birtday party']);
+        'Install a sink', 'Install a shower', 'Install a toilet'], './images/icons/plumber_321315_cc.svg');
+let gardener = new ServiceType('Gardener', ['Cut trees', 'Wattering flowers', 'Sweepping garden'], './images/icons/gardener_321363_cc.svg');
+let housekeeper = new ServiceType('Housekeeper', ['Clean house'], './images/icons/housekeeper_321399_cc.svg');
+let cook = new ServiceType('Cook', ['Prepare breakfest', 'Prepare food for birtday party'], './images/icons/cook_321395_cc.svg');
 let services = [electrician, plumber, gardener, housekeeper, cook];
 
 
@@ -23,15 +23,10 @@ let taskDescr = form.addSection('TASK DESCRIPTION', 'task_description');
 
 
 
-form.addButton(serviceType, 'Electrician', './images/icons/electrician_321339_cc.svg');
-form.addButton(serviceType, 'Plumber', './images/icons/plumber_321315_cc.svg');
-form.addButton(serviceType, 'Gardener', './images/icons/gardener_321363_cc.svg');
-form.addButton(serviceType, 'Housekeeper', './images/icons/housekeeper_321399_cc.svg');
-form.addButton(serviceType, 'Cook', './images/icons/cook_321395_cc.svg');
 
 
 form.addTextField(locat, 'location');
-form.addTextField(taskDescr, 'task_description');
+form.addTextField(taskDescr, 'task_description_input');
 
 form.appendForm();
 
@@ -41,16 +36,18 @@ let formView = new FormView(form);
 let formController = new FormController(formModel, formView);
 formController.listenServiceBtn('.service');
 formController.listenTaskButtons('.task_btn');
-formController.listenDescrtiption('#task_description');
+formController.listenDescrtiption('#task_description_input', '#task_description_output');
+formView.showServiceButtons(formModel.services);
 formView.showNewTaskSection('.new_task');
 
 
 
 
 
-function ServiceType(name, taskList) {
+function ServiceType(name, taskList, imgUrl) {
     this.name = name;
     this.taskList = taskList;
+    this.imgUrl = imgUrl;
 }
 
 function Form(serviceTypeList) {
@@ -104,6 +101,14 @@ function Form(serviceTypeList) {
 function FormView(form) {
     this.form = form;
 
+    this.showServiceButtons = function (serviceTypeList) {
+        let formSection = document.querySelector('.service');
+        console.log(formSection);
+        serviceTypeList.forEach((service) => {
+            this.form.addButton(formSection, service.name, service.imgUrl);
+        });
+    }
+
     this.selectBtn = function () {
         let prevSelectedElem = document.querySelector('#selected');
         if (prevSelectedElem && event.target.tagName === 'IMG')
@@ -139,8 +144,10 @@ function FormView(form) {
         description.appendChild(taskType);
 
         let taskDescr = document.createElement('span');
-        taskDescr.setAttribute('id', 'task_description');
+        taskDescr.setAttribute('id', 'task_description_output');
         description.appendChild(taskDescr);
+
+        addLocationField(description, 'task_location');
 
         let button = document.createElement('button');
         button.setAttribute('type', 'button');
@@ -148,6 +155,12 @@ function FormView(form) {
         newTaskSection.appendChild(description);
         newTaskSection.appendChild(button);
 
+    }
+
+    function addLocationField(descriptionContainer, fieldId) {
+        let locationField = document.createElement('span');
+        locationField.setAttribute('id', fieldId);
+        descriptionContainer.appendChild(locationField);
     }
 
     this.addNewTaskDescription = function (fieldId, text) {
@@ -183,8 +196,19 @@ function FormController(formModel, formView) {
             this.formView.addNewTaskDescription('#service_type', "I need a " + serviceName.toLowerCase())
             this.formView.addNewTaskDescription('#task_type', '');
             this.listenTaskButtons();
+            cleanField('#task_description_input');
+            cleanField('#task_description_output');
         }
 
+    }
+
+    function cleanField(fieldId) {
+        let elem = document.querySelector(fieldId);
+        if (elem.tagName === 'INPUT') { elem.value = ''; }
+        else if (elem.tagName ==='SPAN') {
+            console.log(elem);
+            elem.innerText = '';
+        }
     }
 
     this.listenTaskButtons = function (className) {
@@ -196,23 +220,20 @@ function FormController(formModel, formView) {
     this.handelTaskBtn = function () {
 
         if (event.target.tagName === 'BUTTON') {
-            this.formView.addNewTaskDescription('#task_type', " to " + event.target.innerText.toLowerCase()+". ");
-
+            this.formView.addNewTaskDescription('#task_type', " to " + event.target.innerText.toLowerCase() + ". ");
+            cleanField('#task_description_input');
+            cleanField('#task_description_output');
         }
 
     }
 
-    this.listenDescrtiption = function (textFieldId){
+    this.listenDescrtiption = function (textFieldId, outputFieldId) {
         let field = document.querySelector(textFieldId);
-        field.addEventListener('input', ()=> {
-            this.formView.addNewTaskDescription('#task_description', " "+field.value);
+        field.addEventListener('input', () => {
+            this.formView.addNewTaskDescription(outputFieldId, " " + field.value);
         }
         );
     }
-
-    
-
-
 
 
 }
